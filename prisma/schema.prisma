@@ -11,16 +11,6 @@ datasource db {
   relationMode = "prisma"
 }
 
-model User {
-  id       Int     @id @default(autoincrement())
-  email    String  @unique
-  name     String?
-  password String
-  role     String  @default("user")
-
-  @@map("users")
-}
-
 model Course {
   id     Int     @id @default(autoincrement())
   name   String
