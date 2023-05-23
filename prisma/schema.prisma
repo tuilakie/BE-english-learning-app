@@ -1,0 +1,61 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider     = "mysql"
+  url          = env("DATABASE_URL")
+  relationMode = "prisma"
+}
+
+model User {
+  id       Int     @id @default(autoincrement())
+  email    String  @unique
+  name     String?
+  password String
+  role     String  @default("user")
+
+  @@map("users")
+}
+
+model Course {
+  id     Int     @id @default(autoincrement())
+  name   String
+  levels Level[]
+  words  Word[]
+
+  @@map("courses")
+}
+
+model Level {
+  id       Int    @id @default(autoincrement())
+  name     String
+  courseId Int
+  course   Course @relation(fields: [courseId], references: [id])
+  words    Word[]
+
+  @@unique([name, courseId])
+  @@unique([id, courseId])
+  @@index([courseId])
+  @@map("levels")
+}
+
+model Word {
+  id       Int    @id @default(autoincrement())
+  word     String
+  meaning  String
+  sub      String
+  ipa      String
+  levelId  Int
+  level    Level  @relation(fields: [levelId], references: [id])
+  courseId Int
+  course   Course @relation(fields: [courseId], references: [id])
+
+  @@unique([id, levelId, courseId])
+  @@index([courseId])
+  @@index([levelId])
+  @@map("words")
+}
