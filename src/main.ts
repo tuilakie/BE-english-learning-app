@@ -12,6 +12,7 @@ async function bootstrap() {
     .setDescription('The English Learning API using NestJS and Prisma ORM')
     .setVersion('1.0')
     .addTag('english-learning')
+    .addBearerAuth()
     .build();
 
   const document = SwaggerModule.createDocument(app, config);

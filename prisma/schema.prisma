@@ -23,7 +23,7 @@ model User {
   password     String
   role         Role    @default(user)
   words        Word[]
-  refreshToken String?
+  refreshToken String? @db.Text
 
   @@map("users")
 }
