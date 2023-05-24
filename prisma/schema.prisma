@@ -11,6 +11,23 @@ datasource db {
   relationMode = "prisma"
 }
 
+enum Role {
+  user
+  admin
+}
+
+model User {
+  id           Int     @id @default(autoincrement())
+  email        String  @unique
+  name         String
+  password     String
+  role         Role    @default(user)
+  words        Word[]
+  refreshToken String?
+
+  @@map("users")
+}
+
 model Course {
   id     Int     @id @default(autoincrement())
   name   String
@@ -43,6 +60,7 @@ model Word {
   level    Level  @relation(fields: [levelId], references: [id])
   courseId Int
   course   Course @relation(fields: [courseId], references: [id])
+  learned  User[]
 
   @@unique([id, levelId, courseId])
   @@index([courseId])
