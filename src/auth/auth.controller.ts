@@ -7,6 +7,7 @@ import { User } from '@prisma/client';
 import { ApiBearerAuth, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { AuthGuard } from './auth.guard';
 import { AuthEntity } from './entities/auth.entity';
+import { RefreshDto } from './dto/refresh.dto';
 
 // api routes for auth module swagger
 @ApiTags('auth')
@@ -28,17 +29,13 @@ export class AuthController {
 
   @Post('refresh-token')
   @ApiOkResponse({ description: 'Get new access token', type: AuthEntity })
-  getNewAccessToken(
-    @Body() refreshToken: { refreshToken: string },
-  ): Promise<AuthEntity> {
+  getNewAccessToken(@Body() refreshToken: RefreshDto): Promise<AuthEntity> {
     return this.authService.getNewAccessToken(refreshToken.refreshToken);
   }
 
   @Post('logout')
   @ApiOkResponse({ description: 'Logout successful' })
-  logout(
-    @Body() refreshToken: { refreshToken: string },
-  ): Promise<{ message: string }> {
+  logout(@Body() refreshToken: RefreshDto): Promise<{ message: string }> {
     return this.authService.logout(refreshToken.refreshToken);
   }
 
