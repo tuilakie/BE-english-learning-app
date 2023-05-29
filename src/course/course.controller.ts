@@ -6,11 +6,13 @@ import {
   Patch,
   Param,
   Delete,
+  UseGuards,
 } from '@nestjs/common';
 import { CourseService } from './course.service';
 import { CreateCourseDto } from './dto/create-course.dto';
 import { UpdateCourseDto } from './dto/update-course.dto';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { AuthGuard } from '@/auth/auth.guard';
 
 @ApiTags('course')
 @ApiBearerAuth()
@@ -23,11 +25,13 @@ export class CourseController {
   //   return this.courseService.create(createCourseDto);
   // }
 
+  @UseGuards(AuthGuard)
   @Get()
   findAll() {
     return this.courseService.findAll();
   }
 
+  @UseGuards(AuthGuard)
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.courseService.findOne(+id);

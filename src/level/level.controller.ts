@@ -7,7 +7,7 @@ import { User } from '@prisma/client';
 
 @ApiTags('level')
 @ApiBearerAuth()
-@Controller('course/:courseId/level')
+@Controller('api/course/:courseId/level')
 export class LevelController {
   constructor(private readonly levelService: LevelService) {}
 

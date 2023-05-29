@@ -1,6 +1,6 @@
 import { AuthGuard } from '@/auth/auth.guard';
 import { PrismaService } from '@/prisma/prisma.service';
-import { Injectable, UseGuards } from '@nestjs/common';
+import { HttpException, Injectable, UseGuards } from '@nestjs/common';
 
 @Injectable()
 export class CourseService {
@@ -16,7 +16,13 @@ export class CourseService {
 
   @UseGuards(AuthGuard)
   findOne(id: number) {
-    return this.prisma.course.findUniqueOrThrow({ where: { id } });
+    return this.prisma.course
+      .findUniqueOrThrow({ where: { id } })
+      .catch((e) => {
+        if (e.code === 'P2025') {
+          throw new HttpException(e.message, 404);
+        }
+      });
   }
 
   // update(id: number, updateCourseDto: UpdateCourseDto) {

@@ -20,6 +20,10 @@ export class LevelService {
       },
     });
 
+    // if (!levels.length) {
+    //   return [];
+    // }
+
     const learnedWords = await this.prisma.word.findMany({
       where: {
         learned: {
