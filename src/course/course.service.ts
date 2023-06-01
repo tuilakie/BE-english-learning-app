@@ -1,6 +1,7 @@
 import { AuthGuard } from '@/auth/auth.guard';
 import { PrismaService } from '@/prisma/prisma.service';
 import { HttpException, Injectable, UseGuards } from '@nestjs/common';
+import { User, Word } from '@prisma/client';
 
 @Injectable()
 export class CourseService {
@@ -9,20 +10,93 @@ export class CourseService {
   //   return 'This action adds a new course';
   // }
 
-  @UseGuards(AuthGuard)
-  findAll() {
-    return this.prisma.course.findMany();
+  async findAll(user: User) {
+    const courses = await this.prisma.course.findMany({
+      include: {
+        _count: {
+          select: {
+            words: true,
+          },
+        },
+      },
+    });
+    const learnedWord = await Promise.all(
+      courses.map(async (course) => {
+        const learnedWord = await this.prisma.word.count({
+          where: {
+            AND: [
+              {
+                course: {
+                  id: course.id,
+                },
+              },
+              {
+                learned: {
+                  some: {
+                    id: user.id,
+                  },
+                },
+              },
+            ],
+          },
+        });
+        return {
+          ...course,
+          _count: {
+            ...course._count,
+            progress: learnedWord,
+          },
+        };
+      }),
+    );
+
+    return learnedWord;
   }
 
-  @UseGuards(AuthGuard)
-  findOne(id: number) {
-    return this.prisma.course
-      .findUniqueOrThrow({ where: { id } })
+  async findOne(id: number, user: User) {
+    const course = await this.prisma.course
+      .findUniqueOrThrow({
+        where: { id },
+        include: {
+          _count: {
+            select: {
+              words: true,
+            },
+          },
+        },
+      })
       .catch((e) => {
         if (e.code === 'P2025') {
           throw new HttpException(e.message, 404);
         }
       });
+
+    console.log(course);
+
+    const words = await this.prisma.word.count({
+      where: {
+        AND: [
+          {
+            courseId: id,
+          },
+          {
+            learned: {
+              some: {
+                id: user.id,
+              },
+            },
+          },
+        ],
+      },
+    });
+
+    return {
+      ...course,
+      _count: {
+        ...(course as any)._count,
+        progress: words,
+      },
+    };
   }
 
   // update(id: number, updateCourseDto: UpdateCourseDto) {

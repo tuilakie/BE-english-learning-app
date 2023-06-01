@@ -1,18 +1,8 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Patch,
-  Param,
-  Delete,
-  UseGuards,
-} from '@nestjs/common';
+import { Controller, Get, Param, UseGuards } from '@nestjs/common';
 import { CourseService } from './course.service';
-import { CreateCourseDto } from './dto/create-course.dto';
-import { UpdateCourseDto } from './dto/update-course.dto';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { AuthGuard } from '@/auth/auth.guard';
+import { GetUser } from '@/auth/user.decorator';
 
 @ApiTags('course')
 @ApiBearerAuth()
@@ -27,14 +17,14 @@ export class CourseController {
 
   @UseGuards(AuthGuard)
   @Get()
-  findAll() {
-    return this.courseService.findAll();
+  findAll(@GetUser() user: any) {
+    return this.courseService.findAll(user);
   }
 
   @UseGuards(AuthGuard)
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.courseService.findOne(+id);
+  findOne(@Param('id') id: string, @GetUser() user: any) {
+    return this.courseService.findOne(+id, user);
   }
 
   // @Patch(':id')

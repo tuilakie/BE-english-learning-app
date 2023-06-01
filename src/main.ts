@@ -5,7 +5,7 @@ import { ValidationPipe } from '@nestjs/common';
 import { HttpExceptionFilter } from './http-exception/http-exception.filter';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule, { bodyParser: true });
 
   const config = new DocumentBuilder()
     .setTitle('English Learning API')
@@ -20,6 +20,10 @@ async function bootstrap() {
 
   app.useGlobalPipes(new ValidationPipe({ transform: true, whitelist: true }));
   app.useGlobalFilters(new HttpExceptionFilter());
+  app.enableCors({
+    origin: true,
+  });
+
   await app.listen(4000);
 }
 bootstrap();
