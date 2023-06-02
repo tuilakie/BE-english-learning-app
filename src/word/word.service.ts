@@ -164,4 +164,37 @@ export class WordService {
     });
     return learned;
   }
+
+  async resetLearned(levelId: number, user: User) {
+    const words = await this.prisma.word.findMany({
+      where: {
+        levelId,
+      },
+    });
+
+    console.log(words);
+
+    const learned = await this.prisma.user.update({
+      where: {
+        id: user.id,
+      },
+      data: {
+        words: {
+          disconnect: words.map((word) => {
+            return {
+              id: word.id,
+            };
+          }),
+        },
+      },
+      select: {
+        _count: {
+          select: {
+            words: true,
+          },
+        },
+      },
+    });
+    return learned;
+  }
 }

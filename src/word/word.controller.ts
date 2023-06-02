@@ -1,4 +1,12 @@
-import { Body, Controller, Get, Post, Query, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Post,
+  Query,
+  UseGuards,
+  Param,
+} from '@nestjs/common';
 import { WordService } from './word.service';
 import { ApiBearerAuth, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AuthGuard } from '@/auth/auth.guard';
@@ -52,5 +60,11 @@ export class WordController {
   @UseGuards(AuthGuard)
   learned(@Body() updateLearnedDto: UpdateLearnedDto, @GetUser() user: any) {
     return this.wordService.learned(updateLearnedDto, user);
+  }
+
+  @Post('reset-learned/:levelId')
+  @UseGuards(AuthGuard)
+  resetLearned(@GetUser() user: any, @Param('levelId') levelId: number) {
+    return this.wordService.resetLearned(levelId, user);
   }
 }

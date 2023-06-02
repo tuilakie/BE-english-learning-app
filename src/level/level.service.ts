@@ -1,6 +1,7 @@
 import { PrismaService } from '@/prisma/prisma.service';
 import { Injectable } from '@nestjs/common';
 import { User } from '@prisma/client';
+import { async } from 'rxjs';
 
 @Injectable()
 export class LevelService {
@@ -20,43 +21,29 @@ export class LevelService {
       },
     });
 
-    // if (!levels.length) {
-    //   return [];
-    // }
-
-    const learnedWords = await this.prisma.word.findMany({
-      where: {
-        learned: {
-          some: {
-            id: user.id,
+    return Promise.all(
+      levels.map(async (level) => {
+        const learned = await this.prisma.word.count({
+          where: {
+            learned: {
+              some: {
+                id: user.id,
+              },
+            },
+            level: {
+              id: level.id,
+            },
           },
-        },
-        level: {
-          courseId: courserId,
-        },
-      },
-
-      include: {
-        level: true,
-        _count: {
-          select: {
-            learned: true,
+        });
+        return {
+          ...level,
+          _count: {
+            ...level._count,
+            learned,
           },
-        },
-      },
-    });
-    console.log('learnedWords', learnedWords);
-
-    return levels.map((level) => {
-      const learned = learnedWords.find((word) => word.level.id === level.id);
-      return {
-        ...level,
-        _count: {
-          ...level._count,
-          learned: learned?._count?.learned || 0,
-        },
-      };
-    });
+        };
+      }),
+    );
   }
 
   async findOne(id: number, user: User) {
