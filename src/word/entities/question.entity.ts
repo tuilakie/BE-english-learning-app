@@ -1,12 +1,7 @@
 import { Word } from '@prisma/client';
 
-export class SelectQuestionEntity {
+export class QuestionEntity {
   word: Word;
-  options: Word[];
-  _type = 'select';
-}
-
-export class FillQuestionEntity {
-  word: Word;
-  _type = 'fill';
+  options: Word[] | string[];
+  _type: 'fill' | 'select_word' | 'select_meaning';
 }

@@ -12,11 +12,8 @@ import { ApiBearerAuth, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AuthGuard } from '@/auth/auth.guard';
 import { CaseStudiesEntity } from './entities/case-studies.entity';
 import { GetUser } from '@/auth/user.decorator';
-import {
-  FillQuestionEntity,
-  SelectQuestionEntity,
-} from './entities/question.entity';
 import { UpdateLearnedDto } from './dto/update-learned.dto';
+import { QuestionEntity } from './entities/question.entity';
 
 @ApiTags('word')
 @ApiBearerAuth()
@@ -24,7 +21,7 @@ import { UpdateLearnedDto } from './dto/update-learned.dto';
 export class WordController {
   constructor(private readonly wordService: WordService) {}
 
-  @Get('caseStudies')
+  @Get('case-studies')
   @UseGuards(AuthGuard)
   @ApiResponse({
     status: 200,
@@ -50,9 +47,7 @@ export class WordController {
 
   @Get('quizzes')
   @UseGuards(AuthGuard)
-  getQuizzes(
-    @Query('courseId') courseId: number,
-  ): Promise<SelectQuestionEntity | FillQuestionEntity> {
+  getQuizzes(@Query('courseId') courseId: number): Promise<QuestionEntity> {
     return this.wordService.getQuestion(courseId);
   }
 

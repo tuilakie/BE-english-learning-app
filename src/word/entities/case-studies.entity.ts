@@ -1,13 +1,9 @@
 import { Word } from '@prisma/client';
-import { FillQuestionEntity, SelectQuestionEntity } from './question.entity';
-
-export class WordEntity {
-  word: Word;
-  _type = 'word';
-}
+import { QuestionEntity } from './question.entity';
 
 export class CaseStudiesEntity {
-  caseStudies: (WordEntity | SelectQuestionEntity | FillQuestionEntity)[];
+  words: Word[];
+  questions?: QuestionEntity[];
   meta: {
     total: number;
     skip: number;

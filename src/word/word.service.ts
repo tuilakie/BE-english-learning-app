@@ -2,7 +2,6 @@ import { PrismaService } from '@/prisma/prisma.service';
 import { shuffle } from '@/ultils/shuffle';
 import { HttpException, Injectable } from '@nestjs/common';
 import { User } from '@prisma/client';
-import { skip } from 'rxjs';
 import { CaseStudiesEntity } from './entities/case-studies.entity';
 import { UpdateLearnedDto } from './dto/update-learned.dto';
 
@@ -18,6 +17,10 @@ export class WordService {
     levelId: number,
     user: User,
   ): Promise<CaseStudiesEntity> {
+    if (!levelId || !courseId) {
+      throw new HttpException('Missing levelId or courseId', 400);
+    }
+
     const total = await this.prisma.word.count({
       where: {
         levelId,
@@ -31,6 +34,8 @@ export class WordService {
         400,
       );
     }
+
+    const wordCount = await this.prisma.word.count();
 
     let _take = pagination.take;
     if (pagination.skip + pagination.take > total) {
@@ -50,51 +55,45 @@ export class WordService {
       },
     });
 
-    const wordCase = words.map((word) => {
-      return {
-        word,
-        _type: 'word',
-      };
-    });
-
     const fillQuestion = words.map((word) => {
       return {
         word,
-        _type: 'fill',
+        options: shuffle(word.word.split('')),
+        _type: 'fill' as const,
       };
     });
 
     const selectQuestion = await Promise.all(
       words.map(async (word) => {
+        const randIndex = Math.floor(Math.random() * wordCount);
+
         const options = await this.prisma.word.findMany({
           where: {
-            courseId,
-            levelId,
             id: {
               not: word.id,
             },
           },
           take: 3,
+          skip: randIndex,
         });
-        return {
-          word,
-          options: shuffle([...options, word]),
-          _type: 'select',
-        };
+        return [
+          {
+            word,
+            options: shuffle([...options, word]),
+            _type: 'select_word' as const,
+          },
+          {
+            word,
+            options: shuffle([...options, word]),
+            _type: 'select_meaning' as const,
+          },
+        ];
       }),
     );
 
-    const caseStudies = [
-      ...wordCase.slice(0, _take / 2),
-      ...shuffle(fillQuestion.slice(0, _take / 2)),
-      ...shuffle(selectQuestion.slice(0, _take / 2)),
-      ...wordCase.slice(_take / 2, _take),
-      ...shuffle(fillQuestion.slice(_take / 2, _take)),
-      ...shuffle(selectQuestion.slice(_take / 2, _take)),
-    ];
-
     return {
-      caseStudies,
+      words,
+      questions: shuffle([...fillQuestion, ...selectQuestion.flat()]),
       meta: {
         total,
         skip: pagination.skip,
@@ -109,8 +108,11 @@ export class WordService {
         courseId,
       },
     });
+    const wordCount = await this.prisma.word.count();
+    const randIndex = Math.floor(Math.random() * wordCount);
+
     const rand = Math.random();
-    if (rand > 0.35) {
+    if (rand > 0.7) {
       const options = await this.prisma.word.findMany({
         where: {
           courseId,
@@ -118,17 +120,25 @@ export class WordService {
             not: word.id,
           },
         },
+        skip: randIndex,
         take: 3,
       });
+
+      const _type =
+        Math.random() > 0.35
+          ? ('select_word' as const)
+          : ('select_meaning' as const);
+
       return {
         word,
         options: shuffle([...options, word]),
-        _type: 'select',
+        _type,
       };
     }
     return {
       word,
-      _type: 'fill',
+      options: shuffle(word.word.split('')),
+      _type: 'fill' as const,
     };
   }
 
@@ -171,8 +181,6 @@ export class WordService {
         levelId,
       },
     });
-
-    console.log(words);
 
     const learned = await this.prisma.user.update({
       where: {
