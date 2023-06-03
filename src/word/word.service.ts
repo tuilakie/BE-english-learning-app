@@ -37,11 +37,6 @@ export class WordService {
 
     const wordCount = await this.prisma.word.count();
 
-    let _take = pagination.take;
-    if (pagination.skip + pagination.take > total) {
-      _take = total - pagination.skip;
-    }
-
     const words = await this.prisma.word.findMany({
       ...pagination,
       where: {
@@ -97,7 +92,7 @@ export class WordService {
       meta: {
         total,
         skip: pagination.skip,
-        take: _take,
+        take: words.length,
       },
     };
   }
