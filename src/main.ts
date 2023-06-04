@@ -7,6 +7,8 @@ import { HttpExceptionFilter } from './http-exception/http-exception.filter';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, { bodyParser: true });
 
+  const port = process.env.PORT || 3000;
+
   const config = new DocumentBuilder()
     .setTitle('English Learning API')
     .setDescription('The English Learning API using NestJS and Prisma ORM')
@@ -24,6 +26,6 @@ async function bootstrap() {
     origin: true,
   });
 
-  await app.listen(4000);
+  await app.listen(port, '0.0.0.0');
 }
 bootstrap();
