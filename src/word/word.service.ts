@@ -98,12 +98,14 @@ export class WordService {
   }
 
   async getQuestion(courseId: number) {
+    const wordCount = await this.prisma.word.count();
+
     const word = await this.prisma.word.findFirst({
       where: {
         courseId,
       },
+      skip: Math.floor(Math.random() * wordCount),
     });
-    const wordCount = await this.prisma.word.count();
     const randIndex = Math.floor(Math.random() * wordCount);
 
     const rand = Math.random();
