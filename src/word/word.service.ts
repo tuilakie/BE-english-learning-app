@@ -107,7 +107,7 @@ export class WordService {
     const randIndex = Math.floor(Math.random() * wordCount);
 
     const rand = Math.random();
-    if (rand > 0.7) {
+    if (rand < 0.8) {
       const options = await this.prisma.word.findMany({
         where: {
           courseId,
@@ -120,7 +120,7 @@ export class WordService {
       });
 
       const _type =
-        Math.random() > 0.35
+        Math.random() > 0.4
           ? ('select_word' as const)
           : ('select_meaning' as const);
 
